@@ -86,21 +86,19 @@ class _WordGuessGameState extends State<WordGuessGame> {
     showDialog<void>(
       context: this.context,
       barrierDismissible: false,
-      builder:
-          (BuildContext dialogContext) =>
-              LevelSelectionDialog(onLevelSelected: _startGameWithLevel),
+      builder: (BuildContext dialogContext) =>
+          LevelSelectionDialog(onLevelSelected: _startGameWithLevel),
     );
   }
 
   void _startGameWithLevel(GameLevel level) {
     setState(() {
       currentLevel = level;
-      wordLength =
-          level == GameLevel.easy
-              ? 4
-              : level == GameLevel.medium
-              ? 5
-              : 6;
+      wordLength = level == GameLevel.easy
+          ? 4
+          : level == GameLevel.medium
+          ? 5
+          : 6;
       maxAttempts = 5; // Seviye değişiminde de 5 ile başla
       attempts = List.filled(
         maxAttempts,
@@ -141,13 +139,12 @@ class _WordGuessGameState extends State<WordGuessGame> {
 
     if (result.isNotEmpty) {
       setState(() {
-        targetWord =
-            result.first['word']
-                .toString()
-                .replaceAll("â", "a")
-                .replaceAll("î", "i")
-                .replaceAll("û", "u")
-                .toUpperCaseTr();
+        targetWord = result.first['word']
+            .toString()
+            .replaceAll("â", "a")
+            .replaceAll("î", "i")
+            .replaceAll("û", "u")
+            .toUpperCaseTr();
         print("Yeni kelime: $targetWord"); // Debug için
       });
     }
@@ -252,7 +249,6 @@ class _WordGuessGameState extends State<WordGuessGame> {
       );
       return; // İşlemi durdur
     }
-    _setUsedLetters();
     setState(() {
       if (attempts[currentAttempt] == targetWord) {
         totalAttempts += currentAttempt + 1;
@@ -270,6 +266,8 @@ class _WordGuessGameState extends State<WordGuessGame> {
         }
       }
     });
+    // Gönderim sonrası, klavyedeki kullanılan harfleri güncelle (gönderilen tahmini her zaman dahil et)
+    _setUsedLetters(includeCurrent: true);
 
     _scrollToCurrentAttempt();
   }
@@ -278,84 +276,62 @@ class _WordGuessGameState extends State<WordGuessGame> {
     showDialog<void>(
       context: this.context,
       barrierDismissible: false,
-      builder:
-          (BuildContext dialogContext) => AlertDialog(
-            title: Text(
-              'Oyun Bitti!',
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: Text(
+          'Oyun Bitti!',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF1E293B),
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              showAnswer ? "Yanıt: $targetWord" : 'Maalesef bilemediniz 😔',
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF1E293B),
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                color: const Color(0xFF475569),
               ),
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text(
-                  showAnswer ? "Yanıt: $targetWord" : 'Maalesef bilemediniz 😔',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 18,
-                    color: const Color(0xFF475569),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                    _resetGame();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6366F1),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 14,
+                    ),
+                  ),
+                  child: Text(
+                    'Yeni Oyun',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                   ),
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(dialogContext);
-                        _resetGame();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6366F1),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 14,
-                        ),
-                      ),
-                      child: Text(
-                        'Yeni Oyun',
-                        style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    if (!showAnswer)
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            showAnswer = true;
-                            hasUsedVideoChance = true;
-                          });
-
-                          Navigator.pop(dialogContext);
-                          _showGameOverDialog();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF64748B),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 14,
-                          ),
-                        ),
-                        child: Text(
-                          'Yanıtı Gör',
-                          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                  ],
-                ),
-                if (!hasUsedVideoChance) // Video hakkı kullanılmamışsa göster
+                if (!showAnswer)
                   ElevatedButton(
                     onPressed: () {
+                      setState(() {
+                        showAnswer = true;
+                        hasUsedVideoChance = true;
+                      });
+
                       Navigator.pop(dialogContext);
-                      _watchVideoForExtraAttempt();
+                      _showGameOverDialog();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981),
+                      backgroundColor: const Color(0xFF64748B),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -363,13 +339,34 @@ class _WordGuessGameState extends State<WordGuessGame> {
                       ),
                     ),
                     child: Text(
-                      'Bir deneme hakkı al',
+                      'Yanıtı Gör',
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
                   ),
               ],
             ),
-          ),
+            if (!hasUsedVideoChance) // Video hakkı kullanılmamışsa göster
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                  _watchVideoForExtraAttempt();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 14,
+                  ),
+                ),
+                child: Text(
+                  'Bir deneme hakkı al',
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -415,9 +412,14 @@ class _WordGuessGameState extends State<WordGuessGame> {
     return Colors.grey.shade300;
   }
 
-  void _setUsedLetters() {
-    Set<String> allUsedLetters =
-        attempts.expand((attempt) => attempt.split('')).toSet();
+  void _setUsedLetters({bool includeCurrent = false}) {
+    // Sadece gönderilmiş tahminlerden (currentAttempt öncesi) veya
+    // includeCurrent == true ise mevcut tahmini de dahil ederek kullanılmış harfleri al
+    int takeCount = currentAttempt + (includeCurrent ? 1 : 0);
+    Set<String> allUsedLetters = attempts
+        .take(takeCount)
+        .expand((attempt) => attempt.split(''))
+        .toSet();
     setState(() {
       usedLetters = allUsedLetters;
     });
@@ -450,7 +452,7 @@ class _WordGuessGameState extends State<WordGuessGame> {
 
     if (isGreen) return Colors.green.shade400;
     if (isYellow) return Colors.yellow.shade600;
-    return Colors.grey.shade400; // Kullanılmış ve kelimede olmayan
+    return Colors.grey.shade500; // Kullanılmış ve kelimede olmayan
   }
 
   void _showSuccessDialog() {
@@ -458,75 +460,74 @@ class _WordGuessGameState extends State<WordGuessGame> {
     showDialog<void>(
       context: this.context,
       barrierDismissible: false,
-      builder:
-          (BuildContext dialogContext) => Stack(
-            alignment: Alignment.center,
-            children: [
-              AlertDialog(
-                title: Text(
-                  'Tebrikler! 🎉',
+      builder: (BuildContext dialogContext) => Stack(
+        alignment: Alignment.center,
+        children: [
+          AlertDialog(
+            title: Text(
+              'Tebrikler! 🎉',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1E293B),
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Kelimeyi ${currentAttempt + 1} denemede buldunuz!',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1E293B),
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    color: const Color(0xFF475569),
                   ),
                 ),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Kelimeyi ${currentAttempt + 1} denemede buldunuz!',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        color: const Color(0xFF475569),
-                      ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                    _resetGame();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF10B981),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
                     ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(dialogContext);
-                        _resetGame();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF10B981),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 16,
-                        ),
-                      ),
-                      child: Text(
-                        'Yeni Oyun',
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                  ),
+                  child: Text(
+                    'Yeni Oyun',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
+                  ),
                 ),
-              ),
-              ConfettiWidget(
-                confettiController: _confettiController,
-                blastDirectionality: BlastDirectionality.explosive,
-                emissionFrequency: 0.05,
-                numberOfParticles: 30,
-                maxBlastForce: 50,
-                minBlastForce: 30,
-                gravity: 0.3,
-                createParticlePath: drawStar,
-                colors: const [
-                  Colors.green,
-                  Colors.blue,
-                  Colors.pink,
-                  Colors.orange,
-                  Colors.purple,
-                ],
-              ),
+              ],
+            ),
+          ),
+          ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            emissionFrequency: 0.05,
+            numberOfParticles: 30,
+            maxBlastForce: 50,
+            minBlastForce: 30,
+            gravity: 0.3,
+            createParticlePath: drawStar,
+            colors: const [
+              Colors.green,
+              Colors.blue,
+              Colors.pink,
+              Colors.orange,
+              Colors.purple,
             ],
           ),
+        ],
+      ),
     );
   }
 
@@ -617,45 +618,42 @@ class _WordGuessGameState extends State<WordGuessGame> {
   void _showStatistics() {
     showDialog<void>(
       context: this.context,
-      builder:
-          (BuildContext dialogContext) => AlertDialog(
-            title: Text(
-              'İstatistikler',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF1E293B),
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildStatRow('Toplam Oyun', gamesPlayed.toString()),
-                const SizedBox(height: 10),
-                _buildStatRow(
-                  'Ortalama Tahmin',
-                  gamesPlayed > 0
-                      ? (totalAttempts / gamesPlayed).toStringAsFixed(1)
-                      : '0',
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF6366F1),
-                ),
-                child: Text(
-                  'Kapat',
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: Text(
+          'İstatistikler',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF1E293B),
           ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildStatRow('Toplam Oyun', gamesPlayed.toString()),
+            const SizedBox(height: 10),
+            _buildStatRow(
+              'Ortalama Tahmin',
+              gamesPlayed > 0
+                  ? (totalAttempts / gamesPlayed).toStringAsFixed(1)
+                  : '0',
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF6366F1),
+            ),
+            child: Text(
+              'Kapat',
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -740,11 +738,7 @@ class _WordGuessGameState extends State<WordGuessGame> {
                 tooltip: 'Nasıl Oynanır',
               ),
               IconButton(
-                icon: const Icon(
-                  Icons.speed,
-                  size: 28,
-                  color: Colors.white,
-                ),
+                icon: const Icon(Icons.speed, size: 28, color: Colors.white),
                 onPressed: _showLevelSelectionDialog,
                 tooltip: 'Seviye Seç',
               ),
@@ -787,7 +781,9 @@ class _WordGuessGameState extends State<WordGuessGame> {
                       onSubmit: () => _onSubmit(context),
                       getKeyColor: _getKeyColor,
                     ),
-                    const SizedBox(height: 10), // Keyboard ile banner arası boşluk
+                    const SizedBox(
+                      height: 10,
+                    ), // Keyboard ile banner arası boşluk
                   ],
                 ),
                 ConfettiWidget(
