@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.cinar.salih.kelime_avcisi.app-mergeDebugResources-53:/values-sw360dp-v13/values-sw360dp-v13.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\90542\\.gradle\\caches\\8.12\\transforms\\baab74a0943a72e73de9684342e264c0\\transformed\\preference-1.2.1\\res\\values-sw360dp-v13\\values-sw360dp-v13.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "71",
+                        "endOffsets": "122"
+                    }
+                }
+            ]
+        }
+    ]
+}
